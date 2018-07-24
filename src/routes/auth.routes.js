@@ -11,14 +11,14 @@ const AuthRoutes = (server) => {
             .then(user => {
 
                 if(user !== null){
-                    let token = jwt.sign(JSON.stringify(user), 'diabo')
+                    let token = jwt.sign(JSON.stringify(user), process.env.JWT_SECRET)
                     res.send({ user, token })
                 }else{
                     res.send('Não autenticado')
                 }
             })
             .catch(err => {
-                res.send('Erro')
+                res.send(err)
             })
     })
 }

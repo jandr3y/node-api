@@ -29,7 +29,7 @@ const UserRoutes = (server) => {
                 res.send(result)
             })
             .catch(err => {
-                res.send('Houve um erro')
+                res.send(err)
             })
     })
 
