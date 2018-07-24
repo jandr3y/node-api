@@ -1,0 +1,28 @@
+{
+  "name": "teama",
+  "version": "1.0.0",
+  "description": "Sistema de Gerenciamento de Times",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "team",
+    "manager"
+  ],
+  "author": "Lucas Jandrey",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "mysql": "^2.16.0",
+    "mysql2": "^1.5.3",
+    "sequelize": "^4.38.0",
+    "sha1": "^1.1.1"
+  }
+}
