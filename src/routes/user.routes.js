@@ -1,6 +1,8 @@
 import User from '../models/user.model'
 import Jobs from '../models/job.model'
 import sha1 from 'sha1'
+import * as jwt from 'jsonwebtoken'
+import Guard from '../config/guard'
 
 const UserRoutes = (server) => {
 
@@ -18,10 +20,7 @@ const UserRoutes = (server) => {
     })
 
     // Middleware 
-    server.use((req, res, next) => {
-        console.log('Passando pelo middleware')
-        next()
-    })
+    server.use(Guard)
 
     // Listar usuários
     server.get('/user', (req, res) => {
