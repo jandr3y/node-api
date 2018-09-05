@@ -9,7 +9,8 @@ const UserRoutes = (server) => {
     // Novo usuário
     server.post('/user', (req, res) => {
         let user = new User(req.body)
-        user.password = sha1(user.password)
+        user.password = (user.password) ? sha1(user.password) : ''
+
         user.save()
             .then(result => {
                 res.send(result)

@@ -9,7 +9,7 @@ const AuthRoutes = (server) => {
         User.findOne({ attributes: ['id', 'name', 'username', 'email', 'rank'],
                        where: { username: username, password: encrypt }})
             .then(user => {
-
+                console.log('ae')
                 if(user !== null){
                     let token = jwt.sign(JSON.stringify(user), process.env.JWT_SECRET)
                     res.send({ user, token })
