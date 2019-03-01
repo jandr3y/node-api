@@ -124,12 +124,12 @@ const UserRoutes = (server) => {
     const { id } = req.params
     const { rank } = req.decoded;
 
-    let newUser = User.cleaner(req.body);
-
+    let oUser = User.cleaner(req.body);
+    console.log(oUser)
     if(rank === 0){
-      delete newUser.createdAt;
-      delete newUser.updatedAt;
-      delete newUser.email;
+      delete oUser.createdAt;
+      delete oUser.updatedAt;
+      delete oUser.email;
     }
 
     if(User.isAdmin(req.decoded) || req.decoded.id == id){ 
@@ -139,7 +139,7 @@ const UserRoutes = (server) => {
         }
       })
       .then(user => {
-        user.update(newUser)
+        user.update(oUser.dataValues)
         .then(result => res.send(result))
         .catch(err => res.send(err))
       })

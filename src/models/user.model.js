@@ -47,12 +47,14 @@ User.isAdmin = (user) => {
 User.cleaner = (user) => {
     let { username, password, email, name } = user;
 
-    return {
-        username: username.replace(/ /g, '').toLowerCase(),
-        password: password.replace(/ /g, ''),
-        email: email.toLowerCase(),
-        name: name
-    }
+    let tmpUser = {};
+
+    if(email) tmpUser['email'] = email.toLowerCase();
+    if(name) tmpUser['name'] = name;
+    if(password) tmpUser['password'] = password.replace(/ /g, '');
+    if(username) tmpUser['username'] = username.replace(/ /g, '').toLowerCase();
+    
+    return new User(tmpUser);
 }
 
 export default User
