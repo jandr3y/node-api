@@ -3,10 +3,7 @@ import sha1 from 'sha1'
 import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
 import Validator from '../utils/validator';
-
-const Forbbiden = (res) => {
-  return res.status(403).json({ error: "Acesso não permitido" });
-} 
+import { Forbbiden } from '../utils/responses';
 
 const UserRoutes = (server) => {
 
@@ -16,6 +13,7 @@ const UserRoutes = (server) => {
   server.post('/user', (req, res) => {
 
     let user = new User(req.body);
+
 
     // Validate data.
     try {
@@ -28,7 +26,7 @@ const UserRoutes = (server) => {
       return res.status(400).json(validationError);
     }
 
-    user.password = (user.password) ? sha1(user.password) : ''
+    user.password = sha1(user.password);
     user.rank = 0;
 
     user.save()
@@ -122,21 +120,33 @@ const UserRoutes = (server) => {
    * Update user
    */
   server.put('/user/:id', (req, res) => {
-    const {
-      id
-    } = req.params
 
-    User.findOne({
+    const { id } = req.params
+    const { rank } = req.decoded;
+
+    let newUser = User.cleaner(req.body);
+
+    if(rank === 0){
+      delete newUser.createdAt;
+      delete newUser.updatedAt;
+      delete newUser.email;
+    }
+
+    if(User.isAdmin(req.decoded) || req.decoded.id == id){ 
+      User.findOne({
         where: {
           id: id
         }
       })
       .then(user => {
-        user.update(req.body)
-          .then(result => res.send(result))
-          .catch(err => res.send(err))
+        user.update(newUser)
+        .then(result => res.send(result))
+        .catch(err => res.send(err))
       })
       .catch(err => res.send(err))
+    }else{
+      Forbbiden(res);
+    }
   })
 
 }
