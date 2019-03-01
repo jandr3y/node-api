@@ -1,4 +1,4 @@
-const Validator = (value, name) => {
+function Validator(value, name){
 
   this.value = value;
   this.fieldName = name;

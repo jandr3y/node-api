@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize'
 import db from "../config/database";
 
-const User = db.sequelize.define('user', {
+const User = db.sequelize.define('j_user', {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true
@@ -31,6 +31,9 @@ const User = db.sequelize.define('user', {
         image: Sequelize.STRING        
 })
 
-
+User.isAdmin = (user) => {
+    if(user.rank === 5) return true;
+    else return false;
+}
 
 export default User

@@ -1,34 +1,42 @@
 import User from '../models/user.model'
-import Jobs from '../models/job.model'
 import sha1 from 'sha1'
 import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
 import Validator from '../utils/validator';
 
+const Forbbiden = (res) => {
+  return res.status(403).json({ error: "Acesso não permitido" });
+} 
 
 const UserRoutes = (server) => {
 
-  // Novo usuário
+  /**
+   * Add a new User
+   */
   server.post('/user', (req, res) => {
 
-    let user = new User(req.body)
-    
+    let user = new User(req.body);
+
     // Validate data.
     try {
-      Validator(req.body.email, 'Email').isEmail();
-      Validator(req.body.password, 'Senha').minLength(6).maxLength(20);
-      Validator(req.body.username, 'Usuário').minLength(6).maxLength(20);
+      new Validator(req.body.email, 'Email').isEmail();
+      new Validator(req.body.password, 'Senha').minLength(6).maxLength(20);
+      new Validator(req.body.username, 'Usuário').minLength(6).maxLength(20);
+      new Validator(req.body.name, 'Nome').minLength(6).maxLength(110);
     }catch(validationError){
-      res.json(validationError).status(400);
+      // console.log(validationError);
+      return res.status(400).json(validationError);
     }
 
     user.password = (user.password) ? sha1(user.password) : ''
+    user.rank = 0;
 
     user.save()
       .then(result => {
         res.json(result)
       })
       .catch(err => {
+        // TODO: Handle this error.
         res.send(err.errors.map(current => current.message))
       })
   })
@@ -36,24 +44,36 @@ const UserRoutes = (server) => {
   // Middleware 
   server.use(Guard)
 
-  // Listar usuários
+  /**
+   * GET List all users.
+   */
   server.get('/user', (req, res) => {
-    User.findAll()
-      .then(result => {
-        res.send(result)
-      })
-      .catch(err => {
-        res.send(err)
-      })
+    
+    if(User.isAdmin(req.decoded)){
+      User.findAll()
+        .then(result => {
+          res.send(result)
+        })
+        .catch(err => {
+          res.send(err)
+        })
+    }else{
+      Forbbiden(res);
+    }
+    
   })
 
-  // Listar usuário detalhado
+
+  /**
+   * GET Single user
+   */
   server.get('/user/:id', (req, res) => {
     const {
       id
     } = req.params
 
-    User.findOne({
+    if(User.isAdmin(req.decoded) || req.decoded.id === id){
+      User.findOne({
         where: {
           id: id
         }
@@ -64,9 +84,19 @@ const UserRoutes = (server) => {
       .catch(error => {
         res.send(error)
       })
+    }else{
+      Forbbiden(res);
+    }
+
   })
 
-  // Deletar usuário
+  /**
+   * t
+   *eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwibmFtZSI6IktlbWVyIEphbmRyZXkiLCJ1c2VybmFtZSI6IlRoYW15cmVzS2VtZXIiLCJlbWFpbCI6InRrZW1lckBqYW5kcmV5Lm1lIiwicmFuayI6MH0.AqmxjiIxjOf5W4hyKGrSRaE0_nZ2RYg24WV2erkQaT4 
+   * 
+   * l eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NCwibmFtZSI6Ikx1Y2FzIEphbmRyZXkiLCJ1c2VybmFtZSI6ImFkbWluICAiLCJlbWFpbCI6ImFkbWluQGphbmRyZXkubWUiLCJyYW5rIjo1fQ.9-JgVQWpoOqzpMB3JpTf11hyNxiPsa5Q_pDxKKtDHkU
+   * Delete user
+   */
   server.delete('/user/:id', (req, res) => {
     const {
       id
@@ -88,7 +118,9 @@ const UserRoutes = (server) => {
   })
 
 
-  // Alterar usuário
+  /**
+   * Update user
+   */
   server.put('/user/:id', (req, res) => {
     const {
       id
@@ -107,76 +139,6 @@ const UserRoutes = (server) => {
       .catch(err => res.send(err))
   })
 
-  // Listar usuário e trabalhos
-  server.get('/user/:id/jobs', (req, res) => {
-    const {
-      id
-    } = req.params
-    User.findOne({
-        where: {
-          id: id
-        },
-        include: [{
-          model: Jobs
-        }]
-      })
-      .then(result => res.send(result))
-      .catch(err => res.send(err))
-  })
-
-  // Atrelar trabalho ao usuário
-  server.post('/user/:id/job/:jobid', (req, res) => {
-    const {
-      id,
-      jobid
-    } = req.params
-    User.findOne({
-        where: {
-          id: id
-        }
-      })
-      .then(user => {
-        Jobs.findOne({
-            where: {
-              id: jobid
-            }
-          })
-          .then(job => {
-            user.addJobs(job)
-            user.save()
-              .then(result => res.send({
-                message: 'Trabalho adicionado ao usuário'
-              }))
-              .catch(err => res.send(err))
-          })
-          .catch(err => res.send(err))
-      })
-      .catch(err => res.send(err))
-  })
-
-  // Remover trabalho do usuário
-  server.delete('/user/:id/job/:jobid', (req, res) => {
-    const {
-      id,
-      jobid
-    } = req.params
-    User.findOne({
-        where: {
-          id: id
-        },
-        include: [{
-          model: Jobs
-        }]
-      })
-      .then(user => {
-        let toDelete = user.jobs.map(current => current.id === jobid)
-        user.removeJobs(toDelete)
-        user.save()
-          .then(result => res.send('Job removido'))
-          .catch(err => res.send(err))
-      })
-      .catch(err => res.send(err))
-  })
 }
 
 export default UserRoutes
