@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize'
 import db from "../config/database";
-import Job from './job.model'
 
 const User = db.sequelize.define('user', {
         id: {
@@ -32,9 +31,6 @@ const User = db.sequelize.define('user', {
         image: Sequelize.STRING        
 })
 
-Job.belongsTo(User, { foreignKey: { name: 'owner' } })
 
-Job.belongsToMany(User, { through: 'User_job', foreignKey: { name: 'job_id' }, timestamps: false })
-User.belongsToMany(Job, { through: 'User_job', foreignKey: { name: 'user_id' }, timestamps: false })
 
 export default User
