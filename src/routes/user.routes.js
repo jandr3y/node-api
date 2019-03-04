@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
 import Validator from '../utils/validator';
 import { Forbbiden } from '../utils/responses';
+import Sequelize from "sequelize";
 
 const UserRoutes = (server) => {
 
@@ -96,23 +97,25 @@ const UserRoutes = (server) => {
    * Delete user
    */
   server.delete('/user/:id', (req, res) => {
-    const {
-      id
-    } = req.params
+    const { id } = req.params
 
-    User.findOne({
+    if(req.decoded.id == id){
+      User.findOne({
         where: {
           id: id
         }
       })
       .then(user => {
         user.destroy()
-          .then(result => {
-            res.send(result)
-          })
-          .catch(err => res.send(err))
+        .then(result => {
+          res.send(result)
+        })
+        .catch(err => res.send(err))
       })
       .catch(err => res.send(err))
+    }else{
+      Forbbiden(res);
+    }
   })
 
 
@@ -125,23 +128,25 @@ const UserRoutes = (server) => {
     const { rank } = req.decoded;
 
     let oUser = User.cleaner(req.body);
-    console.log(oUser)
+
+    delete oUser.id;
+    delete oUser.createdAt;
+
     if(rank === 0){
-      delete oUser.createdAt;
-      delete oUser.updatedAt;
+      delete oUser.rank;
       delete oUser.email;
     }
 
+    oUser.updatedAt = Sequelize.fn('NOW');
+    console.log(oUser);
     if(User.isAdmin(req.decoded) || req.decoded.id == id){ 
-      User.findOne({
-        where: {
-          id: id
-        }
-      })
+      User.findOne({ where: { id: id } })
       .then(user => {
         user.update(oUser.dataValues)
-        .then(result => res.send(result))
-        .catch(err => res.send(err))
+            .then(result => {
+              res.json(result)
+            })
+            .catch(err => res.send(err))
       })
       .catch(err => res.send(err))
     }else{

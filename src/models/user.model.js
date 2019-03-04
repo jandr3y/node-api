@@ -23,7 +23,11 @@ const User = db.sequelize.define('j_user', {
             allowNull: false
         },
         createdAt: Sequelize.DATE,
-        updatedAt: Sequelize.DATE,
+        updatedAt: {
+            allowNull: false,
+            type: Sequelize.DATE,
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        },
         rank: {
             type: Sequelize.INTEGER,
             allowNull: false

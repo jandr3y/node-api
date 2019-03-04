@@ -1,6 +1,8 @@
 import User from '../models/user.model'
 import sha1 from 'sha1'
 import * as jwt from 'jsonwebtoken'
+import Validator from '../utils/validator';
+
 
 const AuthRoutes = (server) => {
   server.post('/auth', (req, res) => {
@@ -9,6 +11,13 @@ const AuthRoutes = (server) => {
       username,
       password
     } = req.body;
+
+    try {
+      new Validator(username, 'Username').required();
+      new Validator(password, 'Password').required();
+    }catch(e){
+      return res.json(e);
+    }
 
     let encrypt = sha1(password)
     
