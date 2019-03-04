@@ -5,16 +5,17 @@ import Guard from '../config/guard'
 import Validator from '../utils/validator';
 import { Forbbiden } from '../utils/responses';
 import Sequelize from "sequelize";
+import { SequelizeError } from "../utils/helpers";
+
 
 const UserRoutes = (server) => {
 
   /**
    * Add a new User
    */
-  server.post('/user', (req, res) => {
+  server.post('/user', async (req, res) => {
 
     let user = new User(req.body);
-
 
     // Validate data.
     try {
@@ -23,7 +24,6 @@ const UserRoutes = (server) => {
       new Validator(req.body.username, 'Usuário').minLength(6).maxLength(20);
       new Validator(req.body.name, 'Nome').minLength(6).maxLength(110);
     }catch(validationError){
-      // console.log(validationError);
       return res.status(400).json(validationError);
     }
 
@@ -31,14 +31,10 @@ const UserRoutes = (server) => {
     user.rank = 0;
 
     user.save()
-      .then(result => {
-        res.json(result)
-      })
-      .catch(err => {
-        // TODO: Handle this error.
-        res.send(err.errors.map(current => current.message))
-      })
-  })
+      .then(result => res.status(200).json(result))
+      .catch(err => res.status(500).json({ error: SequelizeError(err) }));
+
+  });
 
   // Middleware 
   server.use(Guard)
@@ -46,16 +42,20 @@ const UserRoutes = (server) => {
   /**
    * GET List all users.
    */
-  server.get('/user', (req, res) => {
+  server.get('/user', async (req, res) => {
     
     if(User.isAdmin(req.decoded)){
-      User.findAll()
-        .then(result => {
-          res.send(result)
-        })
-        .catch(err => {
-          res.send(err)
-        })
+      
+      let args = {
+        attributes: {
+          exclude: ['password']
+        }
+      };
+
+      User.findAll(args)
+        .then(result => res.status(200).json(result))
+        .catch(err => res.status(500).json({ error: SequelizeError(err) }));
+
     }else{
       Forbbiden(res);
     }
@@ -66,23 +66,22 @@ const UserRoutes = (server) => {
   /**
    * GET Single user
    */
-  server.get('/user/:id', (req, res) => {
-    const {
-      id
-    } = req.params
+  server.get('/user/:id', async (req, res) => {
+
+    const { id } = req.params
 
     if(User.isAdmin(req.decoded) || req.decoded.id === id){
-      User.findOne({
+
+      let args = {
         where: {
           id: id
         }
-      })
-      .then(result => {
-        res.send(result)
-      })
-      .catch(error => {
-        res.send(error)
-      })
+      };
+
+      User.findOne(args)
+        .then(results => res.status(200).json(results))
+        .catch(error => res.status(500).json({ error: SequelizeError(err) }));
+
     }else{
       Forbbiden(res);
     }
@@ -96,23 +95,24 @@ const UserRoutes = (server) => {
    * l eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NCwibmFtZSI6Ikx1Y2FzIEphbmRyZXkiLCJ1c2VybmFtZSI6ImFkbWluICAiLCJlbWFpbCI6ImFkbWluQGphbmRyZXkubWUiLCJyYW5rIjo1fQ.9-JgVQWpoOqzpMB3JpTf11hyNxiPsa5Q_pDxKKtDHkU
    * Delete user
    */
-  server.delete('/user/:id', (req, res) => {
+  server.delete('/user/:id', async (req, res) => {
     const { id } = req.params
 
     if(req.decoded.id == id){
-      User.findOne({
+
+      let args = {
         where: {
           id: id
         }
-      })
+      }
+      User.findOne(args)
       .then(user => {
         user.destroy()
-        .then(result => {
-          res.send(result)
-        })
-        .catch(err => res.send(err))
+          .then(result => res.send(result))
+          .catch(err => res.send(err))
       })
-      .catch(err => res.send(err))
+      .catch(err => res.send(err));
+
     }else{
       Forbbiden(res);
     }
@@ -122,13 +122,14 @@ const UserRoutes = (server) => {
   /**
    * Update user
    */
-  server.put('/user/:id', (req, res) => {
+  server.put('/user/:id', async (req, res) => {
 
     const { id } = req.params
     const { rank } = req.decoded;
 
     let oUser = User.cleaner(req.body);
 
+    // delete constat properties
     delete oUser.id;
     delete oUser.createdAt;
 
@@ -138,17 +139,17 @@ const UserRoutes = (server) => {
     }
 
     oUser.updatedAt = Sequelize.fn('NOW');
-    console.log(oUser);
+    
     if(User.isAdmin(req.decoded) || req.decoded.id == id){ 
+
       User.findOne({ where: { id: id } })
       .then(user => {
         user.update(oUser.dataValues)
-            .then(result => {
-              res.json(result)
-            })
-            .catch(err => res.send(err))
+            .then(result => res.status(200).json(result))
+            .catch(err => res.status(500).json({ error: SequelizeError(err) }));
       })
-      .catch(err => res.send(err))
+      .catch(err => res.status(500).json({ error: SequelizeError(err) }));
+      
     }else{
       Forbbiden(res);
     }

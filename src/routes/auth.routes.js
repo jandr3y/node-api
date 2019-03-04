@@ -5,8 +5,11 @@ import Validator from '../utils/validator';
 
 
 const AuthRoutes = (server) => {
-  server.post('/auth', (req, res) => {
-    
+
+  /**
+   * Create a new user
+   */
+  server.post('/auth', (req, res) => { 
     const {
       username,
       password
@@ -19,7 +22,7 @@ const AuthRoutes = (server) => {
       return res.json(e);
     }
 
-    let encrypt = sha1(password)
+    let encrypt = sha1(password);
     
     let attrs = {
       attributes: ['id', 'name', 'username', 'email', 'rank'],
