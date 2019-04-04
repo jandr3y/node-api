@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize'
 import db from "../config/database";
-import User from "./user.model";
+import User from './user.model';
 
 const Group = db.sequelize.define('group', {
         id: {
@@ -37,7 +37,10 @@ const Group = db.sequelize.define('group', {
         }        
 })
 
-// Group.hasOne(User, { foreignKey: { name: 'owner' }});
+Group.associate = function(models){
+  models.Group.hasOne(models.User);
+}
+
 
 // relations
 

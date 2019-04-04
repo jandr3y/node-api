@@ -1,11 +1,13 @@
 require('dotenv').config()
-import Sequelize from 'sequelize'
+const mysql = require('mysql')
 
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-    host: process.env.DB_HOST,
-    dialect: 'mysql'
-})
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  password: process.env.DB_PASSWORD,
+  user: process.env.DB_USER,
+  database: process.env.DB_NAME
+});
 
-const db = { sequelize }
+const db = connection;
 
 export default db

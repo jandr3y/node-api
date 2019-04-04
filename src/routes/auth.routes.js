@@ -32,21 +32,24 @@ const AuthRoutes = (server) => {
       }
     }
 
-    User.findOne(attrs)
-      .then(user => {
-        if (user !== null) {
-          let token = jwt.sign(JSON.stringify(user), process.env.JWT_SECRET)
-          res.send({
-            user,
-            token
-          })
-        } else {
-          res.send('Não autenticado')
-        }
-      })
-      .catch(err => {
-        res.send(err)
-      })
+    let User = new User();
+    console.log( User.find())
+    res.send('oi');
+    // User.findOne(attrs)
+    //   .then(user => {
+    //     if (user !== null) {
+    //       let token = jwt.sign(JSON.stringify(user), process.env.JWT_SECRET)
+    //       res.send({
+    //         user,
+    //         token
+    //       })
+    //     } else {
+    //       res.send('Não autenticado')
+    //     }
+    //   })
+    //   .catch(err => {
+    //     res.send(err)
+    //   })
   })
 }
 

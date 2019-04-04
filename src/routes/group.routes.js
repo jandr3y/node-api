@@ -1,4 +1,4 @@
-import Group from '../models/group.model'
+
 import User from '../models/user.model'
 import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
@@ -39,12 +39,13 @@ const GroupRoutes = (server) => {
       // exclude from result
 
     console.log(User)
-      Group.findAll({ include: [ { model: User.model, as: 'owner' }]})
-        .then(result => res.status(200).json(result))
-        .catch(err => {
-          console.log(err)
-          return res.status(500).json({ error: SequelizeError(err) })
-        });
+    res.send('oi');  
+    // Group.findAll({ include: [ { model: User }]})
+      //   .then(result => res.status(200).json(result))
+      //   .catch(err => {
+      //     console.log(err)
+      //     return res.status(500).json({ error: SequelizeError(err) })
+      //   });
     
   })
 
@@ -75,10 +76,6 @@ const GroupRoutes = (server) => {
   })
 
   /**
-   * t
-   *eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwibmFtZSI6IktlbWVyIEphbmRyZXkiLCJ1c2VybmFtZSI6IlRoYW15cmVzS2VtZXIiLCJlbWFpbCI6InRrZW1lckBqYW5kcmV5Lm1lIiwicmFuayI6MH0.AqmxjiIxjOf5W4hyKGrSRaE0_nZ2RYg24WV2erkQaT4 
-   * 
-   * l eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NCwibmFtZSI6Ikx1Y2FzIEphbmRyZXkiLCJ1c2VybmFtZSI6ImFkbWluICAiLCJlbWFpbCI6ImFkbWluQGphbmRyZXkubWUiLCJyYW5rIjo1fQ.9-JgVQWpoOqzpMB3JpTf11hyNxiPsa5Q_pDxKKtDHkU
    * Delete user
    */
   server.delete('/user/:id', async (req, res) => {

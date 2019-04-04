@@ -28,12 +28,13 @@ const Guard = (req, res, next) => {
   }
 
 
-  console.log(req)
+  // console.log(req)
 
   let token = req.body.token || req.headers['x-access-token']
   if (token) {
     jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
       if (err) {
+        console.log(err);
         return res.json({
           error: 'Acesso não permitido2'
         })
