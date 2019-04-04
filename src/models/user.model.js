@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize'
 import db from "../config/database";
+import Group from './group.model';
 
 const User = db.sequelize.define('user', {
         id: {
@@ -33,6 +34,12 @@ const User = db.sequelize.define('user', {
             allowNull: false
         },
         image: Sequelize.STRING        
+}, {
+    classMethods: {
+      associate : function(models) {
+          User.hasOne(models.group, { foreignKey: { name: 'owner' }});
+      },
+    }
 })
 
 /**
@@ -60,7 +67,6 @@ User.cleaner = (user) => {
     
     return new User(tmpUser);
 }
-
 
 
 export default User

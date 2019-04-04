@@ -1,4 +1,5 @@
 import Group from '../models/group.model'
+import User from '../models/user.model'
 import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
 import Validator from '../utils/validator';
@@ -37,10 +38,13 @@ const GroupRoutes = (server) => {
       
       // exclude from result
 
-
-      Group.findAll()
+    console.log(User)
+      Group.findAll({ include: [ { model: User.model, as: 'owner' }]})
         .then(result => res.status(200).json(result))
-        .catch(err => res.status(500).json({ error: SequelizeError(err) }));
+        .catch(err => {
+          console.log(err)
+          return res.status(500).json({ error: SequelizeError(err) })
+        });
     
   })
 

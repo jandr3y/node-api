@@ -36,9 +36,10 @@ const Group = db.sequelize.define('group', {
           type: Sequelize.INTEGER
         }        
 })
+
+// Group.hasOne(User, { foreignKey: { name: 'owner' }});
+
 // relations
-Group.hasMany(User);
-Group.belongsTo(User, { foreignKey: { name: 'owner' }})
 
 
 export default Group
