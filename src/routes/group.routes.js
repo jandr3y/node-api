@@ -1,5 +1,4 @@
-import User from '../models/user.model'
-import sha1 from 'sha1'
+import Group from '../models/group.model'
 import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
 import Validator from '../utils/validator';
@@ -8,53 +7,40 @@ import Sequelize from "sequelize";
 import { SequelizeError } from "../utils/helpers";
 
 
-const UserRoutes = (server) => {
+const GroupRoutes = (server) => {
 
-  /**
-   * Add a new User
-   */
-  server.post('/user', async (req, res) => {
-
-    let user = new User(req.body);
-
-    // Validate data.
-    try {
-      new Validator(req.body.email, 'Email').isEmail();
-      new Validator(req.body.password, 'Senha').minLength(6).maxLength(20);
-      new Validator(req.body.username, 'Usuário').minLength(6).maxLength(20);
-      new Validator(req.body.name, 'Nome').minLength(6).maxLength(110);
-    }catch(validationError){
-      return res.status(400).json(validationError);
-    }
-
-    user.password = sha1(user.password);
-    user.rank = 0;
-
-    user.save()
-      .then(result => res.status(200).json(result))
-      .catch(err => res.status(500).json({ error: SequelizeError(err) }));
-
-  });
 
   // Middleware 
   server.use(Guard)
 
+
   /**
-   * GET List all users.
+   * POST Create group
    */
-  server.get('/user', async (req, res) => {
+  server.post('/group', async (req, res) => {
+
+    try {
+      new Validator(req.body.name, 'Nome do Grupo').minLength(6).maxLength(155);
+      new Validator(req.body.groupname, 'Link').minLength(6).maxLength(65);
+    }catch(validationError){
+      return res.status(400).json(validationError);
+    }
+
+
+  });
+
+  /**
+   * GET List All Groups.
+   */
+  server.get('/group', async (req, res) => {
     
       
-      let args = {
-        attributes: {
-          exclude: ['password', 'email', 'rank', 'updatedAt']
-        }
-      };
+      // exclude from result
 
-      User.findAll(args)
+
+      Group.findAll()
         .then(result => res.status(200).json(result))
         .catch(err => res.status(500).json({ error: SequelizeError(err) }));
-
     
   })
 
@@ -153,4 +139,4 @@ const UserRoutes = (server) => {
 
 }
 
-export default UserRoutes
+export default GroupRoutes;

@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize'
 import db from "../config/database";
 
-const User = db.sequelize.define('j_user', {
+const User = db.sequelize.define('user', {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true
@@ -60,5 +60,7 @@ User.cleaner = (user) => {
     
     return new User(tmpUser);
 }
+
+
 
 export default User
