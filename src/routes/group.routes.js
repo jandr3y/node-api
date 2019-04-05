@@ -1,5 +1,4 @@
 
-import User from '../models/user.model'
 import * as jwt from 'jsonwebtoken'
 import Guard from '../config/guard'
 import Validator from '../utils/validator';

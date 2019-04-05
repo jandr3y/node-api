@@ -1,8 +1,10 @@
-import User from '../models/user.model'
+
 import sha1 from 'sha1'
 import * as jwt from 'jsonwebtoken'
 import Validator from '../utils/validator';
 
+import User from '../models/User';
+import UserService from '../services/user.service'
 
 const AuthRoutes = (server) => {
 
@@ -23,6 +25,10 @@ const AuthRoutes = (server) => {
     }
 
     let encrypt = sha1(password);
+
+    let user = new User();
+    user.username = username;
+    user.password = encrypt;
     
     let attrs = {
       attributes: ['id', 'name', 'username', 'email', 'rank'],
@@ -32,24 +38,19 @@ const AuthRoutes = (server) => {
       }
     }
 
-    let User = new User();
-    console.log( User.find())
-    res.send('oi');
-    // User.findOne(attrs)
-    //   .then(user => {
-    //     if (user !== null) {
-    //       let token = jwt.sign(JSON.stringify(user), process.env.JWT_SECRET)
-    //       res.send({
-    //         user,
-    //         token
-    //       })
-    //     } else {
-    //       res.send('Não autenticado')
-    //     }
-    //   })
-    //   .catch(err => {
-    //     res.send(err)
-    //   })
+    UserService.auth(user)
+      .then(userResult => {
+
+        if(typeof userResult[0].id === 'undefined'){
+          return res.status(401).json({ message: 'Senha ou usuário incorretos.', status: false });
+        }else{
+          let token = jwt.sign(JSON.stringify(userResult), process.env.JWT_SECRET);
+          return res.json({ user: userResult[0], token }).status(200);
+        }
+      })
+      .catch(error => {
+        return res.status(401).json({ message: error, status: false });
+      });
   })
 }
 
